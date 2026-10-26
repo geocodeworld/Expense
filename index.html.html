@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Expenses</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#697386;--line:#e5e9f1;--accent:#465cf5;--green:#138a63;--shadow:0 8px 28px rgba(28,39,70,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:#172033;color:#fff;padding:28px 20px 30px}header .wrap,main{max-width:1120px;margin:auto}header h1{margin:0;font-size:clamp(25px,4vw,36px);letter-spacing:-.7px}header p{margin:7px 0 0;color:#c7cede}
+main{padding:22px 18px 40px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.stat-label{color:var(--muted);font-size:13px}.stat-value{font-size:clamp(21px,3vw,29px);font-weight:750;letter-spacing:-.6px;margin-top:7px;overflow-wrap:anywhere}.stat-note{font-size:12px;color:var(--muted);margin-top:4px}.section{margin-top:18px}.section h2{font-size:18px;margin:0 0 14px}.two{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.fieldgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:12px;color:var(--muted);font-weight:650}input,select,textarea,button{font:inherit}input,select{width:100%;padding:11px 12px;border:1px solid #d7ddea;border-radius:10px;background:white;color:var(--ink);min-width:0}input:focus,select:focus{outline:2px solid #c7ceff;border-color:var(--accent)}.full{grid-column:1/-1}.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;background:var(--accent);color:white}.btn.secondary{background:#edf0ff;color:#3447d3}.btn.ghost{background:#f1f3f7;color:#344054}.btn.danger{background:#fff0f0;color:#b42318}.btn:hover{filter:brightness(.97)}.muted{color:var(--muted);font-size:13px}.chart-wrap{height:260px;position:relative}canvas{width:100%;height:100%;display:block}.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.toolbar .field{min-width:150px}.toolbar .field.month{min-width:180px}.category-list{display:grid;gap:14px}.cat-row{display:grid;grid-template-columns:130px 1fr 95px;gap:10px;align-items:center;font-size:13px}.track{height:9px;background:#edf0f6;border-radius:99px;overflow:hidden}.bar{height:100%;border-radius:99px;background:var(--accent)}.cat-amount{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}td.amount{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}td:last-child{text-align:right}.pill{display:inline-block;background:#f0f2ff;color:#3949ab;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:700}.empty{text-align:center;padding:28px;color:var(--muted)}.footnote{margin-top:16px;color:var(--muted);font-size:12px}.delete{border:0;background:transparent;color:#b42318;font-weight:700;cursor:pointer}.notice{border-radius:12px;background:#fff8e8;border:1px solid #f3dfac;padding:12px 14px;font-size:13px;color:#75540a;margin-bottom:16px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}}@media(max-width:480px){header{padding:22px 16px}main{padding:15px 12px 30px}.fieldgrid{grid-template-columns:1fr}.full{grid-column:auto}.cat-row{grid-template-columns:100px 1fr 80px;gap:7px}.card{padding:15px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Family Expenses</h1><p>A simple monthly view of Amazon, Swiggy Instamart and everyday spending.</p></div></header>
+<main>
+<div class="notice"><strong>Important:</strong> This version saves entries in this browser only. To share one live, synced expense list with family members on different devices, you’ll need to host it with a shared database. Use Export/Import to move a backup between devices.</div>
+<section class="grid" aria-label="Monthly summary">
+<div class="card"><div class="stat-label">Total this month</div><div class="stat-value" id="total">₹0</div><div class="stat-note" id="monthLabel">Selected month</div></div>
+<div class="card"><div class="stat-label">Amazon</div><div class="stat-value" id="amazonTotal">₹0</div><div class="stat-note">Purchases</div></div>
+<div class="card"><div class="stat-label">Swiggy Instamart</div><div class="stat-value" id="swiggyTotal">₹0</div><div class="stat-note">Groceries and essentials</div></div>
+<div class="card"><div class="stat-label">Miscellaneous</div><div class="stat-value" id="miscTotal">₹0</div><div class="stat-note">Other household spending</div></div>
+</section>
+<section class="section two">
+<div class="card">
+<h2>Add an expense</h2>
+<form id="expenseForm">
+<div class="fieldgrid">
+<div class="field"><label for="date">Date</label><input id="date" type="date" required></div>
+<div class="field"><label for="amount">Amount (₹)</label><input id="amount" type="number" min="0.01" step="0.01" placeholder="e.g. 499" required></div>
+<div class="field"><label for="category">Category</label><select id="category"><option>Amazon</option><option>Swiggy Instamart</option><option>Miscellaneous</option></select></div>
+<div class="field"><label for="paidBy">Paid by</label><input id="paidBy" maxlength="40" placeholder="e.g. Lily"></div>
+<div class="field full"><label for="description">Description (optional)</label><input id="description" maxlength="100" placeholder="e.g. cleaning supplies"></div>
+</div>
+<div class="btnrow"><button class="btn" type="submit">Add expense</button><button class="btn ghost" type="reset">Clear form</button></div>
+</form>
+<p class="footnote">Tip: add each purchase as it happens. You can remove incorrect entries from the table below.</p>
+</div>
+<div class="card">
+<h2>Spending by category</h2><div id="categoryBreakdown" class="category-list"></div>
+</div>
+</section>
+<section class="section two">
+<div class="card">
+<div class="toolbar" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Monthly trend</h2><div class="field month"><label for="trendYear">Year</label><select id="trendYear"></select></div></div>
+<div class="chart-wrap"><canvas id="trendChart" role="img" aria-label="Monthly expense bar chart"></canvas></div>
+<p class="muted">Bars show total expenses for each month in the selected year.</p>
+</div>
+<div class="card">
+<h2>Monthly report</h2>
+<div class="field" style="max-width:240px;margin-bottom:16px"><label for="selectedMonth">Choose month</label><input id="selectedMonth" type="month"></div>
+<div id="reportBreakdown" class="category-list"></div>
+<div class="btnrow"><button class="btn secondary" id="exportCsv" type="button">Export CSV</button><button class="btn ghost" id="exportJson" type="button">Backup data</button><label class="btn ghost" for="importFile" style="cursor:pointer">Import backup</label><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+<p class="footnote">CSV is useful for spreadsheets. JSON backup can be imported on another browser.</p>
+</div>
+</section>
+<section class="section card">
+<div class="toolbar" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Expenses</h2><div class="toolbar"><div class="field"><label for="filterCategory">Category</label><select id="filterCategory"><option value="All">All categories</option><option>Amazon</option><option>Swiggy Instamart</option><option>Miscellaneous</option></select></div><button class="btn ghost" id="clearMonth" type="button">Show all months</button></div></div>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Paid by</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody id="expenseRows"></tbody></table><div id="empty" class="empty">No expenses yet. Add your first expense above.</div></div>
+</section>
+<p class="footnote">Privacy: data is stored in this browser’s local storage. Clearing browser data can erase it, so export a backup periodically.</p>
+</main>
+<script>
+(() => {
+const KEY='family-expenses-v1';
+const categories=['Amazon','Swiggy Instamart','Miscellaneous'];
+let expenses=[];
+try { const saved=JSON.parse(localStorage.getItem(KEY)||'[]'); expenses=Array.isArray(saved)?saved.filter(validExpense):[]; } catch(e) { expenses=[]; }
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(n||0);
+const today=new Date();
+const localDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const monthOf=d=>d.slice(0,7);
+const currentMonth=localDate(today).slice(0,7);
+$('date').value=localDate(today); $('selectedMonth').value=currentMonth;
+function validExpense(x){return x&&typeof x.id==='string'&&typeof x.date==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&categories.includes(x.category);}
+function save(){localStorage.setItem(KEY,JSON.stringify(expenses));render();}
+function total(list){return list.reduce((s,x)=>s+Number(x.amount),0);}
+function selected(){return expenses.filter(x=>monthOf(x.date)===$('selectedMonth').value);}
+function byCategory(list){return categories.map(c=>({name:c,amount:total(list.filter(x=>x.category===c))}));}
+function renderBreakdown(el,list){const rows=byCategory(list),max=Math.max(1,...rows.map(x=>x.amount));$(el).innerHTML=rows.map(x=>`<div class="cat-row"><span>${x.name}</span><div class="track"><div class="bar" style="width:${x.amount/max*100}%"></div></div><span class="cat-amount">${money(x.amount)}</span></div>`).join('');}
+function renderStats(list){$('total').textContent=money(total(list));$('amazonTotal').textContent=money(total(list.filter(x=>x.category==='Amazon')));$('swiggyTotal').textContent=money(total(list.filter(x=>x.category==='Swiggy Instamart')));$('miscTotal').textContent=money(total(list.filter(x=>x.category==='Miscellaneous')));$('monthLabel').textContent=$('selectedMonth').value||'Selected month';}
+function renderTable(){const month=$('selectedMonth').value,cat=$('filterCategory').value;const list=[...expenses].filter(x=>(!month||monthOf(x.date)===month)&&(cat==='All'||x.category===cat)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseRows').innerHTML=list.map(x=>`<tr><td>${escapeHtml(x.date)}</td><td><span class="pill">${escapeHtml(x.category)}</span></td><td>${escapeHtml(x.description||'—')}</td><td>${escapeHtml(x.paidBy||'—')}</td><td class="amount">${money(Number(x.amount))}</td><td><button class="delete" data-delete="${escapeHtml(x.id)}" aria-label="Delete expense">Delete</button></td></tr>`).join('');$('empty').style.display=list.length?'none':'block';}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderChart(){const canvas=$('trendChart'),ctx=canvas.getContext('2d'),year=Number($('trendYear').value)||today.getFullYear(),rect=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=Math.max(1,rect.width*dpr);canvas.height=Math.max(1,rect.height*dpr);ctx.scale(dpr,dpr);const w=rect.width,h=rect.height;ctx.clearRect(0,0,w,h);const pad={l:52,r:12,t:16,b:34},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;const vals=Array.from({length:12},(_,i)=>total(expenses.filter(x=>x.date.startsWith(`${year}-${String(i+1).padStart(2,'0')}`))));const max=Math.max(100,...vals)*1.12;ctx.font='11px system-ui';ctx.textAlign='right';ctx.textBaseline='middle';for(let j=0;j<=4;j++){let y=pad.t+ch*j/4;ctx.strokeStyle='#e7ebf3';ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle='#778196';ctx.fillText(max*(1-j/4)>=1000?'₹'+(max*(1-j/4)/1000).toFixed(1)+'k':'₹'+Math.round(max*(1-j/4)),pad.l-7,y);}const gap=5,bw=Math.max(3,(cw-gap*11)/12);vals.forEach((v,i)=>{let bh=v/max*ch,x=pad.l+i*(bw+gap),y=pad.t+ch-bh;ctx.fillStyle='#5365f5';ctx.beginPath();ctx.roundRect(x,y,bw,Math.max(0,bh),[4,4,0,0]);ctx.fill();ctx.fillStyle='#778196';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i],x+bw/2,h-pad.b+9);});}
+function render(){const list=selected();renderStats(list);renderBreakdown('categoryBreakdown',list);renderBreakdown('reportBreakdown',list);renderTable();renderChart();}
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+$('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('amount').value);if(!Number.isFinite(amount)||amount<=0)return;expenses.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),date:$('date').value,amount,category:$('category').value,paidBy:$('paidBy').value.trim(),description:$('description').value.trim()});$('amount').value='';$('description').value='';$('selectedMonth').value=monthOf($('date').value);save();});
+$('expenseRows').addEventListener('click',e=>{const b=e.target.closest('[data-delete]');if(!b)return;const x=expenses.find(x=>x.id===b.dataset.delete);if(x&&confirm(`Delete ${money(Number(x.amount))} expense?`)){expenses=expenses.filter(y=>y.id!==b.dataset.delete);save();}});
+$('selectedMonth').addEventListener('change',render);$('filterCategory').addEventListener('change',renderTable);
+$('clearMonth').addEventListener('click',()=>{$('selectedMonth').value='';render();});
+$('trendYear').addEventListener('change',renderChart);
+$('exportCsv').addEventListener('click',()=>{const rows=[['Date','Category','Description','Paid by','Amount (INR)'],...expenses.map(x=>[x.date,x.category,x.description,x.paidBy,Number(x.amount)])];const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');download('family-expenses.csv',csv,'text/csv;charset=utf-8;');});
+$('exportJson').addEventListener('click',()=>download('family-expenses-backup.json',JSON.stringify(expenses,null,2),'application/json'));
+$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data)||!data.every(validExpense))throw Error('Invalid backup format');if(confirm(`Import ${data.length} entries? This will merge them with current entries and skip duplicate IDs.`)){const ids=new Set(expenses.map(x=>x.id));expenses.push(...data.filter(x=>!ids.has(x.id)));save();}}catch(err){alert('Could not import this backup. Choose a valid JSON backup exported from this page.');}e.target.value='';});
+const years=new Set([today.getFullYear()]);expenses.forEach(x=>years.add(Number(x.date.slice(0,4))));for(let y=Math.min(...years);y<=Math.max(...years);y++){const o=document.createElement('option');o.value=y;o.textContent=y;$('trendYear').appendChild(o);}$('trendYear').value=today.getFullYear();
+window.addEventListener('resize',renderChart);render();
+})();
+</script>
+</body></html>
